@@ -6,8 +6,14 @@ import datetime
 import os
 import shutil
 import struct
+import sys
 import zipfile
 
+
+if sys.version_info[0] == 2:
+    PY2 = True
+else:
+    PY2 = False
 
 STRUCT_SIZE_MAP = {1: "B", 2: "H", 3: "I", 4: "Q"}
 
@@ -108,7 +114,10 @@ class PlistInfo(OrderedDict):
         if obj_index in self._objs:
             return self._objs[obj_index]
         obj_offset = self.obj_offsets[obj_index]
-        token = ord(self._binary_data[obj_offset])
+        if PY2:
+            token = ord(self._binary_data[obj_offset])
+        else:
+            token = self._binary_data[obj_offset]
         token_h, token_l = token & 0xf0, token & 0x0f
         start = obj_offset + 1
         if token == 0x0:
@@ -186,7 +195,10 @@ class PlistInfo(OrderedDict):
 
     def _get_size(self, token_l, offset):
         if token_l == 0xf:
-            length_size = 1 << (ord(self._binary_data[offset]) & 0x3)
+            if PY2:
+                length_size = 1 << (ord(self._binary_data[offset]) & 0x3)
+            else:
+                length_size = 1 << (self._binary_data[offset] & 0x3)
             struct_type = STRUCT_SIZE_MAP[length_size]
             length_buf = self._binary_data[(
                 offset + 1):(offset + 1 + length_size)]
