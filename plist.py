@@ -5,9 +5,21 @@ from collections import OrderedDict
 import datetime
 import os
 import struct
-
+import zipfile
 
 STRUCT_SIZE_MAP = {1: "B", 2: "H", 3: "I", 4: "Q"}
+
+
+def unzip(file_path, dir_path, members=None):
+    temp_file = zipfile.ZipFile(file_path)
+    try:
+        if members is None:
+            temp_file.extractall(path=dir_path)
+        else:
+            for member in members:
+                temp_file.extract(member, path=dir_path)
+    finally:
+        temp_file.close()
 
 
 class UID(int):
@@ -36,6 +48,30 @@ class PlistInfo(OrderedDict):
             raise ValueError("plist_info=%s is not valid" % plist_file)
         with open(plist_file, "rb") as fd:
             return cls(fd.read())
+
+    @classmethod
+    def from_app(cls, app_path):
+        """from a *.ipa or *.app file
+        """
+        if not os.path.exists(app_path):
+            raise ValueError("app_path=%s invalid" % app_path)
+        if app_path.endswith(".ipa"):
+            dir_path = os.getcwd()
+            base_name = os.path.basename(app_path)
+            app_name = os.path.splitext(base_name)[0]
+            plist_item = "%s.app/Info.plist" % app_name
+            unzip(app_path, dir_path, [plist_item])
+            plist_file = os.path.join(os.getcwd(), plist_item)
+            if not os.path.isfile(plist_file):
+                raise RuntimeError("plist_file=%s not found" % plist_file)
+            p = cls.from_file(plist_file)
+            os.remove(plist_file)
+            return p
+        elif app_path.endswith(".app"):
+            plist_file = os.path.join(app_path, "Info.plist")
+            if not os.path.isfile(plist_file):
+                raise RuntimeError("plist_file=%s not found" % plist_file)
+            return cls.from_file(plist_file)
 
     def _get_fmt(self):
         header = self._binary_data[:32]
@@ -70,7 +106,7 @@ class PlistInfo(OrderedDict):
         if obj_index in self._objs:
             return self._objs[obj_index]
         obj_offset = self.obj_offsets[obj_index]
-        token = self._binary_data[obj_offset]
+        token = ord(self._binary_data[obj_offset])
         token_h, token_l = token & 0xf0, token & 0x0f
         start = obj_offset + 1
         if token == 0x0:
@@ -82,9 +118,11 @@ class PlistInfo(OrderedDict):
         elif token == 0x0f:
             result = b""
         elif token_h == 0x10:  # int
-            end = start + 1 << token_l
+            length = 1 << token_l
+            end = start + length
+            struct_type = STRUCT_SIZE_MAP[length]
             obj_buf = self._binary_data[start:end]
-            result = int.from_bytes(obj_buf, "big", signed=token_l >= 3)
+            result = struct.unpack(">" + struct_type, obj_buf)[0]
         elif token == 0x22:  # float
             end = start + 4
             obj_buf = self._binary_data[start:end]
@@ -116,8 +154,11 @@ class PlistInfo(OrderedDict):
             end = start + obj_size * 2
             result = self._binary_data[start:end].decode('utf-16be')
         elif token_h == 0x80:  # UID
-            end = start + token_l
-            result = UID(int.from_bytes(self._binary_data[start:end], 'big'))
+            length = token_l
+            end = start + length
+            struct_type = STRUCT_SIZE_MAP[length]
+            obj_buf = self._binary_data[start:end]
+            result = UID(struct.unpack(">" + struct_type, obj_buf)[0])
         elif token_h == 0xa0:  # array
             obj_count, length_size = self._get_size(token_l, start)
             start += length_size
@@ -143,7 +184,7 @@ class PlistInfo(OrderedDict):
 
     def _get_size(self, token_l, offset):
         if token_l == 0xf:
-            length_size = 1 << (self._binary_data[offset] & 0x3)
+            length_size = 1 << (ord(self._binary_data[offset]) & 0x3)
             struct_type = STRUCT_SIZE_MAP[length_size]
             length_buf = self._binary_data[(
                 offset + 1):(offset + 1 + length_size)]
