@@ -4,8 +4,10 @@
 from collections import OrderedDict
 import datetime
 import os
+import shutil
 import struct
 import zipfile
+
 
 STRUCT_SIZE_MAP = {1: "B", 2: "H", 3: "I", 4: "Q"}
 
@@ -56,16 +58,16 @@ class PlistInfo(OrderedDict):
         if not os.path.exists(app_path):
             raise ValueError("app_path=%s invalid" % app_path)
         if app_path.endswith(".ipa"):
-            dir_path = os.getcwd()
+            dir_path = os.path.join(os.getcwd(), "temp")
             base_name = os.path.basename(app_path)
             app_name = os.path.splitext(base_name)[0]
             plist_item = "%s.app/Info.plist" % app_name
             unzip(app_path, dir_path, [plist_item])
-            plist_file = os.path.join(os.getcwd(), plist_item)
+            plist_file = os.path.join(dir_path, plist_item)
             if not os.path.isfile(plist_file):
                 raise RuntimeError("plist_file=%s not found" % plist_file)
             p = cls.from_file(plist_file)
-            os.remove(plist_file)
+            shutil.rmtree(dir_path, ignore_errors=True)
             return p
         elif app_path.endswith(".app"):
             plist_file = os.path.join(app_path, "Info.plist")
