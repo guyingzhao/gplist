@@ -52,6 +52,25 @@ class PlistInfoTest(unittest.TestCase):
         new_p = PlistInfo.from_file(xml_file)
         self.assertEqual(new_p, p)
 
+    def test_manipulate_property(self):
+        plist_file = os.path.join(cur_dir, "Info.xml")
+        p = PlistInfo.from_file(plist_file)
+        p.add_property({"a": 1}, "foo")
+        self.assertRaises(ValueError, p.add_property, 1, "foo")
+        self.assertEqual(p["foo"], {"a": 1})
+        p.update_property(2, "foo", "a")
+        self.assertEqual(p["foo"]["a"], 2)
+        p.remove_property("foo", "a")
+        self.assertEqual(p["foo"], {})
+
+        self.assertRaises(ValueError, p.remove_property, "xx")
+        self.assertRaises(ValueError, p.update_property, "xx")
+
+        with self.assertRaises(ValueError) as ctx:
+            p.add_property(1, "foo", "b", "c")
+        e = ctx.exception
+        self.assertIn("b/c", e.args[0])
+
 
 if __name__ == "__main__":
-    unittest.main(defaultTest="PlistInfoTest.test_xml_plist")
+    unittest.main()

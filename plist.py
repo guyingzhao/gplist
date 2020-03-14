@@ -15,7 +15,7 @@ import zipfile
 
 if sys.version_info[0] == 2:
     PY2 = True
-    string_type = basicstring
+    string_type = basicstring  # @UndefinedVariable
 else:
     PY2 = False
     string_type = str
@@ -584,3 +584,59 @@ class PlistInfo(OrderedDict):
     def to_xml_file(self, file_path):
         with open(file_path, "wb") as fd:
             fd.write(self.to_xml())
+
+    def _get_prop_parent(self, prop_fields):
+        if len(prop_fields) < 1:
+            raise ValueError("at least one field needs to be specified")
+        temp_value = self
+        count = 0
+        for field in prop_fields[:-1]:
+            try:
+                temp_value = temp_value[field]
+                count += 1
+            except (IndexError, KeyError):
+                found_path = "/".join(prop_fields[:count])
+                rest_path = "/".join(prop_fields[count:])
+                raise ValueError("`%s` of `%s` not found" %
+                                 (rest_path, found_path))
+
+        return temp_value, prop_fields[-1]
+
+    def add_property(self, value, *prop_fields):
+        """add property to plist
+
+        :param value: property value
+        :type  value: any
+        :param prop_fields: property path
+        :type  prop_fields: tuple
+        """
+        parent, key = self._get_prop_parent(prop_fields)
+        if key in parent:
+            raise ValueError("%s already exists" % ".".join(prop_fields))
+        parent[key] = value
+
+    def update_property(self, value, *prop_fields):
+        """update property to plist
+
+        :param value: property value
+        :type  value: any
+        :param prop_fields: property path
+        :type  prop_fields: tuple
+        """
+        parent, key = self._get_prop_parent(prop_fields)
+        if key not in parent:
+            raise ValueError("%s not found" % ".".join(prop_fields))
+        parent[key] = value
+
+    def remove_property(self, *prop_fields):
+        """remove property from plist
+
+        :param value: property value
+        :type  value: any
+        :param prop_fields: property path
+        :type  prop_fields: tuple
+        """
+        parent, key = self._get_prop_parent(prop_fields)
+        if key not in parent:
+            raise ValueError("%s not found" % ".".join(prop_fields))
+        del parent[key]
