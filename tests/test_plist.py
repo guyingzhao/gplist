@@ -23,6 +23,10 @@ class PlistInfoTest(unittest.TestCase):
         p = PlistInfo.from_file(plist_file)
         self.check_plist(p)
 
+        buf = p.to_binary()
+        new_p = PlistInfo(buf)
+        self.assertEqual(new_p, p)
+
     def test_app(self):
         app_path = os.path.join(cur_dir, "FooApp.app")
         p = PlistInfo.from_app(app_path)
@@ -33,6 +37,11 @@ class PlistInfoTest(unittest.TestCase):
         p = PlistInfo.from_app(app_path)
         self.check_plist(p)
 
+    def test_xml_plist(self):
+        plist_file = os.path.join(cur_dir, "Info.xml")
+        p = PlistInfo.from_file(plist_file)
+        self.check_plist(p)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(defaultTest="PlistInfoTest.test_raw_file")
