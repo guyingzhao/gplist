@@ -5,7 +5,7 @@
 import os
 import unittest
 
-from plist import PlistInfo
+from gplist.plist import PlistInfo
 
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
