@@ -17,14 +17,15 @@ matrix:
 script:
   - python -V
   - python tests/__init__.py
+  - echo $TRAVIS_TAG
 
-before_deploy: echo $TRAVIS_TAG > version.txt
+before_deploy: "echo $TRAVIS_TAG > version.txt"
 deploy:
   provider: pypi
-  user: guyingzhao
+  user: "guyingzhao"
+  password:
+    secure: "N78nEPNaI+Xa0+sBRZlJljnJOJPJnSYZZzFoKgmFg0HtubvRfvEjNkRdAdmu3nUAESKO2pyCTeEIUoyA7UF5B4/lM/sY3BxMmWTu+qu9h5Iapas8Zy/hH80iBfmiSnf7LQiGthiWounesdrn1KU9l1jMM2/5HSlHs9ygpd+Ju4s="
   on:
     tags: true
     condition: "$TRAVIS_TAG =~ [0-9]+\\.[0-9]+\\.[0-9]+ && $BUILD_SDIST = true"
-  password:
-    secure: "N78nEPNaI+Xa0+sBRZlJljnJOJPJnSYZZzFoKgmFg0HtubvRfvEjNkRdAdmu3nUAESKO2pyCTeEIUoyA7UF5B4/lM/sY3BxMmWTu+qu9h5Iapas8Zy/hH80iBfmiSnf7LQiGthiWounesdrn1KU9l1jMM2/5HSlHs9ygpd+Ju4s="
-
+  
