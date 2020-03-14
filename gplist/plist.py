@@ -15,7 +15,7 @@ import zipfile
 
 if sys.version_info[0] == 2:
     PY2 = True
-    string_type = basicstring  # @UndefinedVariable
+    string_type = basestring
 else:
     PY2 = False
     string_type = str

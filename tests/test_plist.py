@@ -5,7 +5,7 @@
 import os
 import unittest
 
-from plist import PlistInfo
+from gplist.plist import PlistInfo
 
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +28,7 @@ class PlistInfoTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(temp_file))
         self.addCleanup(os.remove, temp_file)
         new_p = PlistInfo.from_file(temp_file)
-        self.assertEqual(new_p, p)
+        self.assertEqual(dict(new_p), dict(p))
 
     def test_app(self):
         app_path = os.path.join(cur_dir, "FooApp.app")
