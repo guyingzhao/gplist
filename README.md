@@ -1,10 +1,11 @@
 # plist
 
 [![Build Status](https://travis-ci.org/guyingzhao/gplist.svg?branch=master)](https://travis-ci.org/guyingzhao/gplist)
+[![PyPI version](https://badge.fury.io/py/gplist.svg)](https://pypi.python.org/pypi/gplist/)
 
 ## Introduction
 
-Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This file is a simple implementation of binary format deserialization.
+Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This library is a pure python implementation to manipulate p[![Build Status](https://travis-ci.org/guyingzhao/gplist.svg?branch=master)](https://travis-ci.org/guyingzhao/gplist)
 
 ## Usage
 
