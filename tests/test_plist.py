@@ -23,10 +23,6 @@ class PlistInfoTest(unittest.TestCase):
         p = PlistInfo.from_file(plist_file)
         self.check_plist(p)
 
-        buf = p.to_binary()
-        new_p = PlistInfo(buf)
-        self.assertEqual(new_p, p)
-
         temp_file = "temp.plist"
         p.to_binary_file(temp_file)
         self.assertTrue(os.path.isfile(temp_file))
@@ -49,6 +45,13 @@ class PlistInfoTest(unittest.TestCase):
         p = PlistInfo.from_file(plist_file)
         self.check_plist(p)
 
+        xml_file = "temp.xml"
+        p.to_xml_file(xml_file)
+        self.assertTrue(os.path.isfile(xml_file))
+        self.addCleanup(os.remove, xml_file)
+        new_p = PlistInfo.from_file(xml_file)
+        self.assertEqual(new_p, p)
+
 
 if __name__ == "__main__":
-    unittest.main(defaultTest="PlistInfoTest.test_raw_file")
+    unittest.main(defaultTest="PlistInfoTest.test_xml_plist")

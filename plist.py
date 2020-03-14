@@ -9,7 +9,7 @@ import shutil
 import struct
 import sys
 from xml.dom.expatbuilder import parseString
-from xml.dom.minidom import Element, Document
+from xml.dom.minidom import Element, Document, DocumentType
 import zipfile
 
 
@@ -493,6 +493,94 @@ class PlistInfo(OrderedDict):
                 raise TypeError("unexpected node type: %s" % root.nodeName)
         self._objs[0] = d
 
-    def to_xml(self):
+    def _to_dom_node(self, data, dom):
+        if isinstance(data, bool):
+            if data is True:
+                data_node = dom.createElement("true")
+            else:
+                data_node = dom.createElement("false")
+        elif isinstance(data, string_type):
+            data_node = dom.createElement("string")
+            if data:
+                text_node = dom.createTextNode(data)
+                data_node.appendChild(text_node)
+        elif isinstance(data, int):
+            data_node = dom.createElement("integer")
+            text_node = dom.createTextNode(str(data))
+            data_node.appendChild(text_node)
+        elif isinstance(data, float):
+            data_node = dom.createElement("real")
+            text_node = dom.createTextNode(str(data))
+            data_node.appendChild(text_node)
+        elif isinstance(data, bytes):
+            data_node = dom.createElement("data")
+            data = base64.encodestring(data)
+            text_node = dom.createTextNode(data)
+            data_node.appendChild(text_node)
+        elif isinstance(data, datetime):
+            data_node = dom.createElement("date")
+            data = data.strftime("%Y%m%dT%H:%M:%SZ")
+            text_node = dom.createTextNode(data)
+            data_node.appendChild(text_node)
+        else:
+            raise ValueError("value=%s is unsupported" % data)
+        return data_node
+
+    def to_xml(self, encoding="UTF-8", pretty=True):
         dom = Document()
-        print(dom.documentElement)
+        dom.version = "1.0"
+        dom.encoding = "UTF-8"
+        doc_type = DocumentType("plist")
+        doc_type.publicId = "-//Apple Computer//DTD PLIST 1.0//EN"
+        doc_type.systemId = "http://www.apple.com/DTDs/PropertyList-1.0.dtd"
+        dom.appendChild(doc_type)
+
+        plist_node = dom.createElement("plist")
+        plist_node.setAttribute("version", "1.0")
+        dom.appendChild(plist_node)
+
+        plist_root = dom.createElement("dict")
+        plist_node.appendChild(plist_root)
+        temp_pairs = [(self, plist_root)]
+        while temp_pairs:
+            data, root = temp_pairs.pop(0)
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    k_node = dom.createElement("key")
+                    text_node = dom.createTextNode(k)
+                    k_node.appendChild(text_node)
+                    root.appendChild(k_node)
+
+                    if isinstance(v, dict):
+                        v_node = dom.createElement("dict")
+                        temp_pairs.append((v, v_node))
+                    elif isinstance(v, list):
+                        v_node = dom.createElement("array")
+                        temp_pairs.append((v, v_node))
+                    else:
+                        v_node = self._to_dom_node(v, dom)
+                    root.appendChild(v_node)
+            elif isinstance(data, list):
+                for v in data:
+                    if isinstance(v, dict):
+                        v_node = dom.createElement("dict")
+                        temp_pairs.append((v, v_node))
+                    elif isinstance(v, list):
+                        v_node = dom.createElement("array")
+                        temp_pairs.append((v, v_node))
+                    else:
+                        v_node = self._to_dom_node(v, dom)
+                    root.appendChild(v_node)
+            else:
+                data_node = self._to_dom_node(data, dom)
+                root.appendChild(data_node)
+
+        if pretty:
+            xml_content = dom.toprettyxml(encoding=encoding)
+        else:
+            xml_content = dom.toxml(encoding=encoding)
+        return xml_content
+
+    def to_xml_file(self, file_path):
+        with open(file_path, "wb") as fd:
+            fd.write(self.to_xml())
