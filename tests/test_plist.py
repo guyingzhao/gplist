@@ -27,6 +27,13 @@ class PlistInfoTest(unittest.TestCase):
         new_p = PlistInfo(buf)
         self.assertEqual(new_p, p)
 
+        temp_file = "temp.plist"
+        p.to_binary_file(temp_file)
+        self.assertTrue(os.path.isfile(temp_file))
+        self.addCleanup(os.remove, temp_file)
+        new_p = PlistInfo.from_file(temp_file)
+        self.assertEqual(new_p, p)
+
     def test_app(self):
         app_path = os.path.join(cur_dir, "FooApp.app")
         p = PlistInfo.from_app(app_path)

@@ -9,7 +9,7 @@ import shutil
 import struct
 import sys
 from xml.dom.expatbuilder import parseString
-from xml.dom.minidom import Element
+from xml.dom.minidom import Element, Document
 import zipfile
 
 
@@ -400,6 +400,10 @@ class PlistInfo(OrderedDict):
                            0, offset)
         return b"bplist00" + buf
 
+    def to_binary_file(self, file_path):
+        with open(file_path, "wb") as fd:
+            fd.write(self.to_binary())
+
     def _parse(self):
         fmt = self._get_fmt()
         if fmt == "binary":
@@ -490,4 +494,5 @@ class PlistInfo(OrderedDict):
         self._objs[0] = d
 
     def to_xml(self):
-        pass
+        dom = Document()
+        print(dom.documentElement)
