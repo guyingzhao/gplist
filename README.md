@@ -5,8 +5,7 @@
 
 ## Introduction
 
-Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This library is a pure python implementation to manipulate p[![Build Status](https://travis-ci.org/guyingzhao/gplist.svg?branch=master)](https://travis-ci.org/guyingzhao/gplist)
-
+Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This library is a pure python implementation to manipulate plist file.
 ## Usage
 
 The `PlistInfo` is an ordered dict-liked class, so you can treat it as an ordered dict.
