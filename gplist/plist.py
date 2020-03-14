@@ -581,9 +581,10 @@ class PlistInfo(OrderedDict):
             xml_content = dom.toxml(encoding=encoding)
         return xml_content
 
-    def to_xml_file(self, file_path):
+    def to_xml_file(self, file_path, encoding="UTF-8", pretty=True):
         with open(file_path, "wb") as fd:
-            fd.write(self.to_xml())
+            fd.write(self.to_xml(encoding=encoding,
+                                 pretty=pretty))
 
     def _get_prop_parent(self, prop_fields):
         if len(prop_fields) < 1:
