@@ -16,7 +16,7 @@ def generate_version():
             version = fd.read()
     else:
         version = "0.0.1"
-        with open(version, "w") as fd:
+        with open(version_file, "w") as fd:
             fd.write(version)
     return version
 
@@ -32,6 +32,7 @@ if __name__ == "__main__":
         name="gplist",
         version=generate_version(),
         packages=find_packages(exclude=("tests", "tests.*")),
+        data_files=[("version.txt", ["version.txt"])],
         description="pure python plist manipulator",
         long_description=get_description(),
         long_description_content_type="text/markdown",
