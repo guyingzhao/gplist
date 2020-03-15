@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """plist
 """
-import base64
 from collections import OrderedDict
+from xml.dom.expatbuilder import parseString
+from xml.dom.minidom import Element, Document, DocumentType
+import base64
 import datetime
 import os
 import shutil
 import struct
 import sys
-from xml.dom.expatbuilder import parseString
-from xml.dom.minidom import Element, Document, DocumentType
 import zipfile
 
 
@@ -458,11 +458,14 @@ class PlistInfo(OrderedDict):
         elif node_type == "array":
             node_value = []
         elif node_type == "data":
-            node_value = base64.decodestring(node.childNodes[0].nodeValue)
+            content = node.childNodes[0].nodeValue
+            if not PY2:
+                content = content.encode("ascii")
+            node_value = base64.decodestring(content)
         elif node_type == "date":
             content = node.childNodes[0].nodeValue
             node_value = datetime.datetime.strptime(
-                content, "%Y%m%dT%H:%M:%SZ")
+                content, "%Y-%m-%dT%H:%M:%SZ")
         else:
             raise ValueError("unexpected node_type=%s" % node_type)
         return node_value
@@ -515,11 +518,13 @@ class PlistInfo(OrderedDict):
         elif isinstance(data, bytes):
             data_node = dom.createElement("data")
             data = base64.encodestring(data)
+            if not PY2:
+                data = data.decode("ascii")
             text_node = dom.createTextNode(data)
             data_node.appendChild(text_node)
-        elif isinstance(data, datetime):
+        elif isinstance(data, datetime.datetime):
             data_node = dom.createElement("date")
-            data = data.strftime("%Y%m%dT%H:%M:%SZ")
+            data = data.strftime("%Y-%m-%dT%H:%M:%SZ")
             text_node = dom.createTextNode(data)
             data_node.appendChild(text_node)
         else:
