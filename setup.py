@@ -27,12 +27,26 @@ def get_description():
         return fd.read()
 
 
+def get_requires():
+    requirements = os.path.join(ROOT_DIR, "requirements.txt")
+    requires = []
+    with open(requirements) as fd:
+        lines = fd.read().split("\n")
+        for line in lines:
+            line = line.strip()
+            if line:
+                requires.append(line)
+    return requires
+
+
 if __name__ == "__main__":
     setup(
         name="gplist",
         version=generate_version(),
         packages=find_packages(exclude=("tests", "tests.*")),
-        data_files=[("version.txt", ["version.txt"])],
+        data_files=[("version.txt", ["version.txt"]),
+                    ("requirements.txt", ["requirements.txt"])],
+        install_requires=get_requires(),
         description="pure python plist manipulator",
         long_description=get_description(),
         long_description_content_type="text/markdown",
