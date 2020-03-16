@@ -57,10 +57,10 @@ class UID(int):
     __repr__ = __str__
 
 
-class Data(bytes):
+class Data(str):
 
     def __init__(self, val):
-        super(Data, self).__init__(val)
+        super(Data, self).__init__()
         self._raw = None
 
     @property
@@ -469,7 +469,10 @@ class PlistInfo(OrderedDict):
             node_value = []
         elif node_type == "data":
             content = node.childNodes[0].nodeValue
-            node_value = Data(content)
+            if PY2:
+                node_value = Data(content)
+            else:
+                node_value = Data(content)
         elif node_type == "date":
             content = node.childNodes[0].nodeValue
             node_value = datetime.datetime.strptime(
