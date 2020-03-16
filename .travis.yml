@@ -24,7 +24,7 @@ deploy:
   provider: pypi
   user: "guyingzhao"
   password:
-    secure: "N78nEPNaI+Xa0+sBRZlJljnJOJPJnSYZZzFoKgmFg0HtubvRfvEjNkRdAdmu3nUAESKO2pyCTeEIUoyA7UF5B4/lM/sY3BxMmWTu+qu9h5Iapas8Zy/hH80iBfmiSnf7LQiGthiWounesdrn1KU9l1jMM2/5HSlHs9ygpd+Ju4s="
+    secure: hBI0X1bVQxJ2cftFvF0F1jGHw9CbDo421+uSrSpmG4NjC4gKgtgcfebhcG5gajhttV1qu4QMe0qdyMZVvdk+7RT9IwhEOdPfuAGSWzlfIDu/pWcIK/CUygWzbwsC3w7WS1UEJJONOBo9K+YwZOTZUxtSp7wJ6IWYTXIXCAGZqQthqXswv1/6Auw6atyfNoOY6cjBXpoS3VFJfSYbSMtElrts9JJ+pCPyvU5vD5XnGfZddA8BFP8OtfNfQCmnpq8Bi0KD4QtLpci2UTaVnzdV3RNghffRqP1+LU1rjs7cKF/dTIEMK2JgIcTCPB8TTLjPDVfSbMDlbNU4xxyOKtWCXSv/YHHBgNDvAZCmCqWc9QzHKatHmywSulJaYPuwuN97CCf75rHFBtXFm1Lttf7fv1krBVzysALSLNGOgH325d4Asuxm3BdI2xkpt6Xggm4cJgw3hyURF3r+erFItUAxn/wHH5NOlqeI+d3pmoUcwD33Rts4WQWInO8Iyt4byd6+gA6PyFjRqhZLN0t1RdmpQIBvIQ18JpIb8K2g0pH6g5Lwi8O1E98zn+uHM0sbOfUUiKHXuCpTdcSr6KAYHgIprUbemH6qvaoJgOqXL4d/LE7YfJ/EKbfETwFNc++Rp688odI7WkaCUB6+kiSc364hVeXAvjz9aPKhOxXvW2iHQ4k=
   on:
     tags: true
     condition: "$TRAVIS_TAG =~ [0-9]+\\.[0-9]+\\.[0-9]+ && $BUILD_SDIST = true"
