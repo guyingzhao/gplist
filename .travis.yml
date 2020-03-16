@@ -17,12 +17,11 @@ matrix:
 script:
   - python -V
   - python tests/__init__.py
-
-before_deploy:
   - echo $TRAVIS_TAG > version.txt
   - cat version.txt
-  
+
 deploy:
+  skip_cleanup: true
   provider: pypi
   user: "guyingzhao"
   password:
