@@ -5,12 +5,15 @@
 
 ## Introduction
 
-Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This library is a pure python implementation to manipulate plist file.
+Info.plist is a manifest-liked file to store properties of an application. It's file format can be xml or binary. This library is a pure python implementation to manipulate plist file and parse mobileprovision file.
+
 ## Usage
 
 The `PlistInfo` is an ordered dict-liked class, so you can treat it as an ordered dict.
 
 When parsing from binary data or file, `PlistInfo` will automatically detect the format and get the correct result.
+
+`MobileProvision` is an ordered dict-liked class too, and basically its data comes from xml plist.
 
 ### Binary Format
 
@@ -78,3 +81,17 @@ p.remove_property("foo", "a")
 assert p["foo"] == {"b": "c"}
 ```
 
+### Mobile Provision
+
+```python
+from gplist.mobileprovision import MobileProvision
+
+m = MobileProvision(provision_file)
+print(m.is_expired())
+print(m["Name"])
+print(m.has_udid("00008030-001A2DA6********")
+for cert in m.certs:
+    print(cert.sha1)
+    print(cert.is_expired())
+```
+```
