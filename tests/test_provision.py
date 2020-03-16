@@ -16,6 +16,7 @@ class MobileProvisionTest(unittest.TestCase):
         provision_file = os.path.join(BASE_DIR, "embedded.mobileprovision")
         if not os.path.isfile(provision_file):
             print("%s not found, MobileProvisionTest skipped")
+            return
 
         m = MobileProvision.from_file(provision_file)
         self.assertIn("Name", m)
