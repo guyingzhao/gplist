@@ -81,6 +81,10 @@ class PlistInfo(OrderedDict):
         self._parse()
         super(PlistInfo, self).__init__(self._objs[0])
 
+    @property
+    def format(self):
+        return self._get_fmt()
+
     @classmethod
     def from_file(cls, plist_file):
         if not os.path.exists(plist_file):

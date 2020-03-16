@@ -89,7 +89,7 @@ from gplist.mobileprovision import MobileProvision
 m = MobileProvision.from_file(provision_file)
 print(m.is_expired())
 print(m["Name"])
-print(m.has_udid("00008030-001A2DA6********"))
+print(m.has_udid("00008030-001A2DA6********")
 for cert in m.certs:
     print(cert.sha1)
     print(cert.is_expired())
