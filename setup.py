@@ -13,7 +13,7 @@ def generate_version():
     version_file = os.path.join(ROOT_DIR, "version.txt")
     if os.path.exists(version_file):
         with open(version_file) as fd:
-            version = fd.read()
+            version = fd.read().strip()
     else:
         version = "0.0.1"
         with open(version_file, "w") as fd:
