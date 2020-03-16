@@ -4,7 +4,7 @@
 
 from collections import OrderedDict
 from datetime import datetime
-from gplist.plist import PlistInfo
+from gplist.plist import PlistInfo, PY2
 import binascii
 
 from cryptography import x509
@@ -26,7 +26,10 @@ class Cert(object):
     def sha1(self):
         if self._sha1 is None:
             data = self._cert.fingerprint(SHA1())
-            self._sha1 = binascii.hexlify(data).upper()
+            data = binascii.hexlify(data)
+            if not PY2:
+                data = data.decode("ascii")
+            self._sha1 = data.upper()
         return self._sha1
 
     @property
