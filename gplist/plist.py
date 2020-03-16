@@ -61,6 +61,16 @@ class Data(bytes):
 
     def __init__(self, val):
         super(Data, self).__init__(val)
+        self._raw = None
+
+    @property
+    def raw(self):
+        if self._raw is None:
+            if PY2:
+                self._raw = base64.decodestring(self)
+            else:
+                self._raw = base64.decodebytes(self.encode("ascii"))
+        return self._raw
 
 
 class PlistInfo(OrderedDict):
@@ -177,7 +187,7 @@ class PlistInfo(OrderedDict):
             obj_size, length_size = self._get_size(token_l, start)
             start += length_size
             end = start + obj_size
-            result = self._binary_data[start:end]
+            result = Data(self._binary_data[start:end])
         elif token_h == 0x50:  # ascii string
             obj_size, length_size = self._get_size(token_l, start)
             start += length_size
@@ -459,9 +469,7 @@ class PlistInfo(OrderedDict):
             node_value = []
         elif node_type == "data":
             content = node.childNodes[0].nodeValue
-            if not PY2:
-                content = content.encode("ascii")
-            node_value = base64.decodestring(content)
+            node_value = Data(content)
         elif node_type == "date":
             content = node.childNodes[0].nodeValue
             node_value = datetime.datetime.strptime(
@@ -515,11 +523,8 @@ class PlistInfo(OrderedDict):
             data_node = dom.createElement("real")
             text_node = dom.createTextNode(str(data))
             data_node.appendChild(text_node)
-        elif isinstance(data, bytes):
+        elif isinstance(data, Data):
             data_node = dom.createElement("data")
-            data = base64.encodestring(data)
-            if not PY2:
-                data = data.decode("ascii")
             text_node = dom.createTextNode(data)
             data_node.appendChild(text_node)
         elif isinstance(data, datetime.datetime):

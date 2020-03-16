@@ -2,13 +2,12 @@
 """mobile provision file serializing
 """
 
-from collections import OrderedDict
+from cryptography import x509
+from cryptography.hazmat import backends
 from datetime import datetime
 from gplist.plist import PlistInfo, PY2
 import binascii
 
-from cryptography import x509
-from cryptography.hazmat import backends
 from cryptography.hazmat.primitives.hashes import SHA1
 
 
@@ -45,11 +44,10 @@ class Cert(object):
         return now < self.invalid_before or now > self.invalid_after
 
 
-class MobileProvision(OrderedDict):
+class MobileProvision(PlistInfo):
 
-    def __init__(self, plist_buf):
-        p = PlistInfo(plist_buf)
-        super(MobileProvision, self).__init__(p)
+    def __init__(self, binary):
+        super(MobileProvision, self).__init__(binary)
         self._certs = None
 
     @classmethod
@@ -67,7 +65,8 @@ class MobileProvision(OrderedDict):
             backend = backends.default_backend()
             self._certs = []
             for cert_data in self["DeveloperCertificates"]:
-                cert_obj = x509.load_der_x509_certificate(cert_data, backend)
+                cert_obj = x509.load_der_x509_certificate(
+                    cert_data.raw, backend)
                 self._certs.append(Cert(cert_obj))
         return self._certs
 
