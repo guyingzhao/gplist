@@ -86,7 +86,7 @@ assert p["foo"] == {"b": "c"}
 ```python
 from gplist.mobileprovision import MobileProvision
 
-m = MobileProvision(provision_file)
+m = MobileProvision.from_file(provision_file)
 print(m.is_expired())
 print(m["Name"])
 print(m.has_udid("00008030-001A2DA6********")
