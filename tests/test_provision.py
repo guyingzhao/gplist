@@ -15,7 +15,7 @@ class MobileProvisionTest(unittest.TestCase):
     def test_provision(self):
         provision_file = os.path.join(BASE_DIR, "embedded.mobileprovision")
         if not os.path.isfile(provision_file):
-            print("%s not found, MobileProvisionTest skipped")
+            print("%s not found, MobileProvisionTest skipped" % provision_file)
             return
 
         m = MobileProvision.from_file(provision_file)
