@@ -2,9 +2,9 @@
 """setup recipe
 """
 
+from setuptools import setup, find_packages
 import os
 
-from setuptools import setup, find_packages
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,8 +44,8 @@ if __name__ == "__main__":
         name="gplist",
         version=generate_version(),
         packages=find_packages(exclude=("tests", "tests.*")),
-        data_files=[("version.txt", ["version.txt"]),
-                    ("requirements.txt", ["requirements.txt"])],
+        include_package_data=True,
+        package_data={"": ["*.txt"]},
         install_requires=get_requires(),
         description="pure python plist manipulator",
         long_description=get_description(),
