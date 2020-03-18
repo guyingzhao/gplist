@@ -40,12 +40,16 @@ def get_requires():
 
 
 if __name__ == "__main__":
+    manifest = os.path.join(ROOT_DIR, "MANIFEST.in")
+    if not os.path.isfile(manifest):
+        print("MANIFEST.in not found")
+        exit(1)
     setup(
         name="gplist",
         version=generate_version(),
         packages=find_packages(exclude=("tests", "tests.*")),
         include_package_data=True,
-        package_data={"": ["*.txt"]},
+        package_data={"": []},
         install_requires=get_requires(),
         description="pure python plist manipulator",
         long_description=get_description(),

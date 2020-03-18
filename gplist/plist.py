@@ -81,6 +81,12 @@ class PlistInfo(OrderedDict):
         self._parse()
         super(PlistInfo, self).__init__(self._objs[0])
 
+    def __eq__(self, other):
+        return dict.__eq__(self, other)
+
+    def __ne__(self, other):
+        return dict.__ne__(self, other)
+
     @property
     def format(self):
         return self._get_fmt()
@@ -658,3 +664,12 @@ class PlistInfo(OrderedDict):
         if key not in parent:
             raise ValueError("%s not found" % ".".join(prop_fields))
         del parent[key]
+
+
+class DictPlistInfo(PlistInfo):
+    """plist information from dict data
+    """
+
+    def __init__(self, data):
+        self._objs = OrderedDict()
+        super(PlistInfo, self).__init__(data)

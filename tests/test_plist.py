@@ -2,10 +2,9 @@
 """test plist info
 """
 
+from gplist.plist import PlistInfo, DictPlistInfo
 import os
 import unittest
-
-from gplist.plist import PlistInfo
 
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +27,7 @@ class PlistInfoTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(temp_file))
         self.addCleanup(os.remove, temp_file)
         new_p = PlistInfo.from_file(temp_file)
-        self.assertEqual(dict(new_p), dict(p))
+        self.assertEqual(new_p, p)
 
     def test_app(self):
         app_path = os.path.join(cur_dir, "FooApp.app")
@@ -70,6 +69,17 @@ class PlistInfoTest(unittest.TestCase):
             p.add_property(1, "foo", "b", "c")
         e = ctx.exception
         self.assertIn("b/c", e.args[0])
+
+    def test_dict_plist(self):
+        data = {"foo": {"a": 1}}
+        p = DictPlistInfo(data)
+        xml_file = "dict_plist.xml"
+        p.to_xml_file(xml_file)
+        self.assertTrue(os.path.isfile(xml_file))
+        self.addCleanup(os.remove, xml_file)
+
+        new_p = PlistInfo.from_file(xml_file)
+        self.assertEqual(new_p, data)
 
 
 if __name__ == "__main__":
