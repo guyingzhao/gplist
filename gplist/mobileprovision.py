@@ -2,13 +2,13 @@
 """mobile provision file serializing
 """
 
-from cryptography import x509
-from cryptography.hazmat import backends
 from datetime import datetime
-from gplist.plist import PlistInfo, PY2
 import binascii
 
+from cryptography import x509
+from cryptography.hazmat import backends
 from cryptography.hazmat.primitives.hashes import SHA1
+from gplist.plist import PlistInfo, PY2
 
 
 class Cert(object):
@@ -74,4 +74,7 @@ class MobileProvision(PlistInfo):
         return datetime.utcnow() > self["ExpirationDate"]
 
     def has_udid(self, udid):
-        return udid in self["ProvisionedDevices"]
+        if "ProvisionsAllDevices" in self:
+            return self["ProvisionsAllDevices"]
+        else:
+            return udid in self["ProvisionedDevices"]
