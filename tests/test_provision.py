@@ -2,9 +2,10 @@
 """provision test
 """
 
-from gplist.mobileprovision import MobileProvision
 import os
 import unittest
+
+from gplist.mobileprovision import MobileProvision
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,8 +23,12 @@ class MobileProvisionTest(unittest.TestCase):
         self.assertIn("Name", m)
         self.assertFalse(m.is_expired())
 
-        udid = m["ProvisionedDevices"][0]
-        self.assertTrue(m.has_udid(udid))
+        if "ProvisionsAllDevices" in m:
+            self.assertTrue(m["ProvisionsAllDevices"])
+            self.assertTrue(m.has_udid("xxxx"))
+        else:
+            udid = m["ProvisionedDevices"][0]
+            self.assertTrue(m.has_udid(udid))
 
         self.assertTrue(type(str), m.certs[0].sha1)
         for cert in m.certs:
