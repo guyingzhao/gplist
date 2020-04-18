@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """plist
 """
-from collections import OrderedDict
-from xml.dom.expatbuilder import parseString
-from xml.dom.minidom import Element, Document, DocumentType
 import base64
+from collections import OrderedDict
 import datetime
 import os
 import shutil
 import struct
 import sys
+from xml.dom.expatbuilder import parseString
+from xml.dom.minidom import Element, Document, DocumentType
 import zipfile
 
 
@@ -171,7 +171,7 @@ class PlistInfo(OrderedDict):
         elif token == 0x9:
             result = True
         elif token == 0x0f:
-            result = b""
+            result = ""
         elif token_h == 0x10:  # int
             length = 1 << token_l
             end = start + length
@@ -268,7 +268,7 @@ class PlistInfo(OrderedDict):
             else:
                 self._values[value] = index
 
-        self.obj_count += 1
+        self.obj_index += 1
         self.obj_offsets[index] = offset
         value_buf = b""
         if value is None:
@@ -357,20 +357,21 @@ class PlistInfo(OrderedDict):
             length = len(value)
             if length < 0xf:
                 token_l = length
-                length_bytes = 0
             else:
                 token_l = 0xf
-                int_buf, bit_offset, length_bytes = self._pack_int(length)
+                int_buf, bit_offset, _ = self._pack_int(length)
                 value_buf += struct.pack("B", bit_offset)
                 value_buf += int_buf
             item_count = len(value)
-            offset += len(value_buf) + item_count + length_bytes + 1
+            offset += 1 + len(value_buf)
+            offset += item_count * self.ref_size
             data_buf = b""
+            struct_type = ">" + STRUCT_SIZE_MAP[self.ref_size]
             for item_value in value:
                 obj_offset, item_buf, offset = self._write_object(
-                    item_value, self.obj_count, offset)
-                value_buf += struct.pack("B", obj_offset)
-                self.obj_offsets[self.obj_count] = offset
+                    item_value, self.obj_index, offset)
+                value_buf += struct.pack(struct_type, obj_offset)
+                self.obj_offsets[self.obj_index] = offset
                 data_buf += item_buf
             value_buf += data_buf
             token = token_h | token_l
@@ -379,27 +380,26 @@ class PlistInfo(OrderedDict):
             length = len(value)
             if length < 0xf:
                 token_l = length
-                length_bytes = 0
             else:
                 token_l = 0xf
-                int_buf, bit_offset, length_bytes = self._pack_int(length)
+                int_buf, bit_offset, _ = self._pack_int(length)
                 value_buf += struct.pack("B", bit_offset)
                 value_buf += int_buf
             item_count = len(value)
-            offset += len(value_buf) + 2 * item_count + length_bytes
-            if index != 0:
-                offset += 1
+            offset += 1 + len(value_buf)
+            offset += 2 * item_count * self.ref_size
             data_buf = b""
+            struct_type = ">" + STRUCT_SIZE_MAP[self.ref_size]
             for k in value.keys():
                 obj_offset, k_buf, offset = self._write_object(
-                    k, self.obj_count, offset)
+                    k, self.obj_index, offset)
                 data_buf += k_buf
-                value_buf += struct.pack("B", obj_offset)
+                value_buf += struct.pack(struct_type, obj_offset)
             for v in value.values():
                 obj_offset, v_buf, offset = self._write_object(
-                    v, self.obj_count, offset)
+                    v, self.obj_index, offset)
                 data_buf += v_buf
-                value_buf += struct.pack("B", obj_offset)
+                value_buf += struct.pack(struct_type, obj_offset)
             value_buf += data_buf
             token = token_h | token_l
         else:
@@ -409,14 +409,41 @@ class PlistInfo(OrderedDict):
             offset += len(buf)
         return index, buf, offset
 
+    def _get_obj_count(self):
+        obj_count = 1
+        roots = [self]
+        values = []
+        while roots:
+            temp_root = roots.pop(0)
+            if isinstance(temp_root, dict):
+                obj_count += 1
+                roots.extend(temp_root.keys())
+                roots.extend(temp_root.values())
+            elif isinstance(temp_root, list):
+                obj_count += 1
+                roots.extend(temp_root)
+            elif isinstance(temp_root, bool):
+                obj_count += 1
+            else:
+                if temp_root not in values:
+                    values.append(temp_root)
+                    obj_count += 1
+        return obj_count
+
     def to_binary(self):
-        self.obj_count = 0
+        self.obj_index = 0
         self.obj_offsets = {}
         self._values = {}
+        obj_count = self._get_obj_count()
+        self.ref_size = self._pack_int(obj_count)[2]
         _, buf, offset = self._write_object(self, 0, 8)
+        if (len(buf) + 8) != offset:
+            raise RuntimeError(
+                "(buf length[%s] + 8) != offset[%s]" % (len(buf), offset))
         for obj_offset in self.obj_offsets.values():
             buf += struct.pack(">H", obj_offset)
-        buf += struct.pack(">6xBBQQQ", 2, 1, self.obj_count,
+
+        buf += struct.pack(">6xBBQQQ", 2, self.ref_size, obj_count,
                            0, offset)
         return b"bplist00" + buf
 
