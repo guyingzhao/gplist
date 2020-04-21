@@ -2,10 +2,9 @@
 """provision test
 """
 
+from gplist.mobileprovision import MobileProvision
 import os
 import unittest
-
-from gplist.mobileprovision import MobileProvision
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +32,11 @@ class MobileProvisionTest(unittest.TestCase):
         self.assertTrue(type(str), m.certs[0].sha1)
         for cert in m.certs:
             self.assertFalse(cert.is_expired())
+            self.assertNotEqual(cert.serial, None)
+            self.assertNotEqual(cert.common_name, None)
+            self.assertNotEqual(cert.organization_unit_name, None)
+            self.assertNotEqual(cert.organization_name, None)
+            self.assertNotEqual(cert.country_name, None)
 
         xml_data = m.to_xml()
         new_m = MobileProvision(xml_data)
