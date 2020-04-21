@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """plist
 """
-import base64
 from collections import OrderedDict
+from xml.dom.expatbuilder import parseString
+from xml.dom.minidom import Element, Document, DocumentType
+import base64
 import datetime
 import os
 import shutil
 import struct
 import sys
-from xml.dom.expatbuilder import parseString
-from xml.dom.minidom import Element, Document, DocumentType
 import zipfile
 
 
@@ -21,7 +21,7 @@ else:
     string_type = str
 
 
-STRUCT_SIZE_MAP = {1: "B", 2: "H", 3: "I", 4: "Q"}
+STRUCT_SIZE_MAP = {1: "B", 2: "H", 4: "I", 8: "Q"}
 
 
 def unzip(file_path, dir_path, members=None):
