@@ -93,7 +93,19 @@ print(m.has_udid("00008030-001A2DA6********")
 for cert in m.certs:
     print(cert.sha1)
     print(cert.is_expired())
-```
+    print(cert.serial)
+    print(cert.common_name)
+    print(cert.organization_unit_name)
+    print(cert.organization_name)
+    print(cert.country_name)
 ```
 
+### Command Line Tools
+
+```shell
+python -m gplist Info.plist
+python -m gplist embedded.mobileprovision
+python -m gplist --cert embedded.mobileprovision
+python -m gplist --has-udid "00008030-001A2DA6********" embedded.mobileprovision
 ```
+
