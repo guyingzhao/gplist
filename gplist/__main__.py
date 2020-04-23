@@ -18,7 +18,7 @@ class PlistEncoder(json.encoder.JSONEncoder):
         if isinstance(o, datetime):
             return o.strftime("%Y-%m-%dT%H:%M:%SZ")
         elif isinstance(o, bytes):
-            return binascii.hexlify(o)
+            return binascii.hexlify(o).encode("ascii")
         elif isinstance(o, map):
             return list(o)
         return o
