@@ -2,13 +2,14 @@
 """main test
 """
 
-from gplist.__main__ import PlistEncoder
-from gplist.mobileprovision import MobileProvision
-from gplist.plist import PlistInfo
 import json
 import os
 import sys
 import unittest
+
+from gplist.__main__ import PlistEncoder
+from gplist.mobileprovision import MobileProvision
+from gplist.plist import PlistInfo
 
 
 py_exe = "python%s.%s" % (sys.version_info[0], sys.version_info[1])
@@ -29,7 +30,7 @@ class MainTest(unittest.TestCase):
     def test_provision(self):
         file_path = os.path.join(cur_dir, "embedded.mobileprovision")
         if not os.path.exists(file_path):
-            print("file=%s not found, skipped")
+            print("file=%s not found, skipped" % file_path)
             return
 
         cmdline = "%s -m gplist %s" % (py_exe, file_path)
