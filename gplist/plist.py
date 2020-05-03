@@ -148,10 +148,10 @@ class PlistInfo(OrderedDict):
 
     def _parse_binary(self):
         tailer = self._binary_data[-32:]
-        unit_size, self.ref_size, obj_count, top, table_offset = struct.unpack(
+        unit_size, self.ref_size, self.obj_count, top, table_offset = struct.unpack(
             ">6xBBQQQ", tailer)
         self.obj_offsets = self._read_ints(
-            obj_count, unit_size, table_offset)
+            self.obj_count, unit_size, table_offset)
         self._read_object(top)
 
     def _read_object(self, obj_index):
@@ -277,8 +277,6 @@ class PlistInfo(OrderedDict):
             token = 0x8
         elif value is True:
             token = 0x9
-        elif value == "":
-            token = 0xf
         elif isinstance(value, int):
             token_h = 0x10
             value_buf, token_l, _ = self._pack_int(value)
@@ -434,8 +432,8 @@ class PlistInfo(OrderedDict):
         self.obj_index = 0
         self.obj_offsets = {}
         self._values = {}
-        obj_count = self._get_obj_count()
-        self.ref_size = self._pack_int(obj_count)[2]
+        self.obj_count = self._get_obj_count()
+        self.ref_size = self._pack_int(self.obj_count)[2]
         _, buf, offset = self._write_object(self, 0, 8)
         if (len(buf) + 8) != offset:
             raise RuntimeError(
@@ -443,7 +441,7 @@ class PlistInfo(OrderedDict):
         for obj_offset in self.obj_offsets.values():
             buf += struct.pack(">H", obj_offset)
 
-        buf += struct.pack(">6xBBQQQ", 2, self.ref_size, obj_count,
+        buf += struct.pack(">6xBBQQQ", 2, self.ref_size, self.obj_count,
                            0, offset)
         return b"bplist00" + buf
 
