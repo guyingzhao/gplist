@@ -16,6 +16,8 @@ matrix:
     
 script:
   - python -V
+  - pip -V
+  - if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
   - python tests/__init__.py
   - echo $TRAVIS_TAG > version.txt
   - cat version.txt

@@ -3,8 +3,10 @@
 """
 
 import os
+import plistlib
 import unittest
 
+import biplist
 from gplist.plist import PlistInfo, DictPlistInfo
 
 
@@ -99,6 +101,15 @@ class PlistInfoTest(unittest.TestCase):
         p2 = PlistInfo.from_file(bin_file)
         self.assertEqual(p, p2)
 
+    def test_with_biplist(self):
+        plist_file = os.path.join(cur_dir, "large.plist")
+        p = PlistInfo.from_file(plist_file)
+        p2 = biplist.readPlist(plist_file)
+        self.assertEqual(p, p2)
+
+        p3 = biplist.readPlistFromString(p.to_binary())
+        self.assertEqual(p, p3)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(defaultTest="PlistInfoTest.test_with_biplist")
