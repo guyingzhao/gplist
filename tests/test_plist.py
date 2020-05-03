@@ -102,7 +102,7 @@ class PlistInfoTest(unittest.TestCase):
         self.assertEqual(p, p2)
 
     def test_with_biplist(self):
-        plist_file = "large.plist"
+        plist_file = os.path.join(cur_dir, "large.plist")
         p = PlistInfo.from_file(plist_file)
         p2 = biplist.readPlist(plist_file)
         self.assertEqual(p, p2)
