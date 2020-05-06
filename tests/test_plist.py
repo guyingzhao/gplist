@@ -2,11 +2,11 @@
 """test plist info
 """
 
+from gplist.plist import PlistInfo, DictPlistInfo
 import os
 import unittest
 
 import biplist
-from gplist.plist import PlistInfo, DictPlistInfo
 
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))

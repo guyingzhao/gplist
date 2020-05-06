@@ -429,6 +429,9 @@ class PlistInfo(OrderedDict):
         return obj_count
 
     def to_binary(self):
+        import biplist
+        return biplist.writePlistToString(self)
+
         self.obj_index = 0
         self.obj_offsets = {}
         self._values = {}
