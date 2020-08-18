@@ -21,7 +21,7 @@ else:
     string_type = str
 
 
-STRUCT_SIZE_MAP = {1: "B", 2: "H", 4: "I", 8: "Q"}
+STRUCT_SIZE_MAP = {1: "B", 2: "H", 4: "I", 8: "q", 16: "Q"}
 
 
 def unzip(file_path, dir_path, members=None):
@@ -174,7 +174,10 @@ class PlistInfo(OrderedDict):
             result = ""
         elif token_h == 0x10:  # int
             length = 1 << token_l
-            end = start + length
+            if length == 16:  # unsigned long long
+                end = start + 8
+            else:
+                end = start + length
             struct_type = STRUCT_SIZE_MAP[length]
             obj_buf = self._binary_data[start:end]
             result = struct.unpack(">" + struct_type, obj_buf)[0]
