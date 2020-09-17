@@ -16,9 +16,11 @@ import zipfile
 if sys.version_info[0] == 2:
     PY2 = True
     string_type = basestring
+    bytes_type = str
 else:
     PY2 = False
     string_type = str
+    bytes_type = bytes
 
 
 STRUCT_SIZE_MAP = {1: "B", 2: "H", 4: "I", 8: "q", 16: "Q"}
@@ -75,11 +77,16 @@ class Data(str):
 
 class PlistInfo(OrderedDict):
 
-    def __init__(self, binary_data):
-        self._binary_data = binary_data
+    def __init__(self, data):
         self._objs = OrderedDict()
-        self._parse()
-        super(PlistInfo, self).__init__(self._objs[0])
+        if isinstance(data, bytes_type):
+            self._binary_data = data
+            self._parse()
+            super(PlistInfo, self).__init__(self._objs[0])
+        elif isinstance(data, dict):
+            super(PlistInfo, self).__init__(data)
+        else:
+            raise TypeError("data=%s didn't match bytes or dict type" % data)
 
     def __eq__(self, other):
         return dict.__eq__(self, other)
@@ -697,10 +704,5 @@ class PlistInfo(OrderedDict):
         del parent[key]
 
 
-class DictPlistInfo(PlistInfo):
-    """plist information from dict data
-    """
-
-    def __init__(self, data):
-        self._objs = OrderedDict()
-        super(PlistInfo, self).__init__(data)
+class DictPlistInfo(PlistInfo):  # shall be remove at next version
+    pass
