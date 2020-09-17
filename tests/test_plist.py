@@ -2,7 +2,7 @@
 """test plist info
 """
 
-from gplist.plist import PlistInfo, DictPlistInfo
+from gplist.plist import PlistInfo
 import os
 import unittest
 
@@ -85,7 +85,7 @@ class PlistInfoTest(unittest.TestCase):
 
     def test_dict_plist(self):
         data = {"foo": {"a": 1}}
-        p = DictPlistInfo(data)
+        p = PlistInfo(data)
         xml_file = "dict_plist.xml"
         p.to_xml_file(xml_file)
         self.assertTrue(os.path.isfile(xml_file))
