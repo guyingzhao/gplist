@@ -5,7 +5,9 @@ from collections import OrderedDict
 from xml.dom.expatbuilder import parseString
 from xml.dom.minidom import Element, Document, DocumentType
 import base64
+import binascii
 import datetime
+import json
 import os
 import shutil
 import struct
@@ -15,7 +17,7 @@ import zipfile
 
 if sys.version_info[0] == 2:
     PY2 = True
-    string_type = basestring
+    string_type = basestring  # noqa
     bytes_type = str
 else:
     PY2 = False
@@ -93,6 +95,9 @@ class PlistInfo(OrderedDict):
 
     def __ne__(self, other):
         return dict.__ne__(self, other)
+
+    def __str__(self):
+        return json.dumps(self, cls=PlistEncoder, indent=2)
 
     @property
     def format(self):
@@ -706,3 +711,15 @@ class PlistInfo(OrderedDict):
 
 class DictPlistInfo(PlistInfo):  # shall be remove at next version
     pass
+
+
+class PlistEncoder(json.encoder.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, datetime.datetime):
+            return o.strftime("%Y-%m-%dT%H:%M:%SZ")
+        elif isinstance(o, bytes):
+            return binascii.hexlify(o).encode("ascii")
+        elif isinstance(o, map):
+            return list(o)
+        return o
