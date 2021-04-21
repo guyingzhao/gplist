@@ -2,26 +2,13 @@
 """command line tools
 """
 
-from datetime import datetime
 from gplist.mobileprovision import MobileProvision
-from gplist.plist import PlistInfo
 import argparse
-import binascii
 import json
 import os
 import sys
 
-
-class PlistEncoder(json.encoder.JSONEncoder):
-
-    def default(self, o):
-        if isinstance(o, datetime):
-            return o.strftime("%Y-%m-%dT%H:%M:%SZ")
-        elif isinstance(o, bytes):
-            return binascii.hexlify(o).encode("ascii")
-        elif isinstance(o, map):
-            return list(o)
-        return o
+from gplist.plist import PlistInfo, PlistEncoder
 
 
 def main():
