@@ -12,6 +12,7 @@ import os
 import shutil
 import struct
 import sys
+import tempfile
 import zipfile
 
 
@@ -118,16 +119,18 @@ class PlistInfo(OrderedDict):
             raise ValueError("app_path=%s not found" % app_path)
         app_path = app_path.rstrip(os.path.sep)
         if app_path.endswith(".ipa"):
-            dir_path = os.path.join(os.getcwd(), "temp")
-            app_item = get_ipa_app(app_path)
-            plist_item = app_item + "Info.plist"
-            unzip(app_path, dir_path, [plist_item])
-            plist_file = os.path.join(dir_path, plist_item)
-            if not os.path.isfile(plist_file):
-                raise RuntimeError("plist_file=%s not found" % plist_file)
-            p = cls.from_file(plist_file)
-            shutil.rmtree(dir_path, ignore_errors=True)
-            return p
+            dir_path = tempfile.mkdtemp(prefix="gplist_")
+            try:
+                app_item = get_ipa_app(app_path)
+                plist_item = app_item + "Info.plist"
+                unzip(app_path, dir_path, [plist_item])
+                plist_file = os.path.join(dir_path, plist_item)
+                if not os.path.isfile(plist_file):
+                    raise RuntimeError("plist_file=%s not found" % plist_file)
+                p = cls.from_file(plist_file)
+                return p
+            finally:
+                shutil.rmtree(dir_path, ignore_errors=True)
         elif app_path.endswith(".app"):
             plist_file = os.path.join(app_path, "Info.plist")
             if not os.path.isfile(plist_file):
